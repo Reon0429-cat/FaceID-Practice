@@ -9,7 +9,7 @@ import UIKit
 import LocalAuthentication
 
 final class ViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -26,17 +26,17 @@ final class ViewController: UIViewController {
                     break
             }
         } else {
-            // 生体認証を許可していない
-            print("キャンセル")
-            print("DEBUG_PRINT: ", error as Any)
+            // アラート
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
         }
         
     }
     
     private func evaluatePolicy(context: LAContext) {
-        let localizedReason = "ロックの解除に、認証を使用します。"
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                               localizedReason: localizedReason) { isSuccess, error in
+                               localizedReason: "ロックの解除に、認証を使用します。") { isSuccess, error in
             if let error = error {
                 switch LAError(_nsError: error as NSError).code {
                     case .userCancel:
@@ -44,14 +44,12 @@ final class ViewController: UIViewController {
                     default:
                         break
                 }
+                return
+            }
+            if isSuccess {
+                print("成功")
             } else {
-                if isSuccess {
-                    // 認証成功
-                    print("成功")
-                } else {
-                    // キャンセルされた時
-                    print("DEBUG_PRINT: ", error as Any)
-                }
+                print("失敗")
             }
         }
     }
